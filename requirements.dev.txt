@@ -1,0 +1,4 @@
+pre-commit==4.4.0
+ruff==0.14.4
+isort==7.0.0
+black==25.9.0
