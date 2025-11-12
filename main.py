@@ -1,4 +1,5 @@
 import pygame
+from src.modules.game import Game
 
 def main():
     pygame.init()
