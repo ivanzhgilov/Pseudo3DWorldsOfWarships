@@ -1,18 +1,29 @@
 import pygame
-import src.consts
 
+import src.consts
 from src.utils.funcs import load_sound
 
 BUTTON_WIDTH, BUTTON_HEIGHT = src.consts.BUTTON_WIDTH, src.consts.BUTTON_HEIGHT
 
 
 class HoverButton(pygame.sprite.Sprite):
-    def __init__(self, x, y, text, *group, width=BUTTON_WIDTH, height=BUTTON_HEIGHT,
-                 normal_color=(150, 150, 150), hover_color=(100, 100, 100),
-                 text_color=(0, 0, 0), hover_text_color=(206, 115, 34),
-                 border_color=(0, 0, 0), hover_border_color=(206, 115, 34),
-                 border_width=2,
-                 font_size=24):
+    def __init__(
+        self,
+        x,
+        y,
+        text,
+        *group,
+        width=BUTTON_WIDTH,
+        height=BUTTON_HEIGHT,
+        normal_color=(150, 150, 150),
+        hover_color=(100, 100, 100),
+        text_color=(0, 0, 0),
+        hover_text_color=(206, 115, 34),
+        border_color=(0, 0, 0),
+        hover_border_color=(206, 115, 34),
+        border_width=2,
+        font_size=24,
+    ):
         super().__init__(group)
 
         self.image = pygame.Surface((width, height), pygame.SRCALPHA)
@@ -60,7 +71,9 @@ class HoverButton(pygame.sprite.Sprite):
         pygame.draw.rect(self.image, bg_color, (0, 0, self.width, self.height))
 
         # Отрисовка контура
-        pygame.draw.rect(self.image, border_color, (0, 0, self.width, self.height), self.border_width)
+        pygame.draw.rect(
+            self.image, border_color, (0, 0, self.width, self.height), self.border_width
+        )
 
         # Отрисовка текста
         text_surface = self.font.render(self.text, True, text_color)
@@ -104,7 +117,6 @@ if __name__ == "__main__":
 
         # Обновление кнопки
         button.update()
-
 
         # Отрисовка
         screen.fill((30, 30, 30))

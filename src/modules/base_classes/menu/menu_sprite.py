@@ -1,7 +1,7 @@
 import pygame
 
-class MenuSprite(pygame.sprite.Sprite):
 
+class MenuSprite(pygame.sprite.Sprite):
     def __init__(self, screen, img, x, y, rx, ry, *group):
         super().__init__(group)
 

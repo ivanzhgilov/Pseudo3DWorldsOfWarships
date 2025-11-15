@@ -4,8 +4,10 @@ import sys
 from functools import cache
 
 import pygame as pg
+import src.consts
 
-from src.consts import CELL_SIZE, GAME_HEIGHT, GAME_WIDTH, WALL_SIZE, Moves
+CELL_SIZE = src.consts.CELL_SIZE
+MAP_SIZE = src.consts.MAP_SIZE
 
 
 def resource_path(*relative_path, use_abs_path: bool = False):
@@ -22,9 +24,9 @@ def resource_path(*relative_path, use_abs_path: bool = False):
 
 @cache
 def load_image(
-    name: str,
-    colorkey: pg.Color | int | None = None,
-    crop_it: bool = False,
+        name: str,
+        colorkey: pg.Color | int | None = None,
+        crop_it: bool = False,
 ) -> pg.Surface:
     """
     Загрузка изображения в pygame.Surface.
@@ -103,165 +105,6 @@ def crop(screen: pg.Surface) -> pg.Surface:
     return screen.subsurface((min_x, min_y, max_x - min_x, max_y - min_y))
 
 
-def pixels_to_cell(
-    xy_pos: tuple[int, int] | tuple[float, float],
-) -> tuple[int, int] | None:
-    """
-    Переводит пиксели на экране в клетку комнаты.
-
-    :param xy_pos: Координаты в пикселях.
-    :return: Координаты в клетках.
-    """
-    x, y = xy_pos
-    if (
-        WALL_SIZE <= x < GAME_WIDTH - WALL_SIZE
-        and WALL_SIZE <= y < GAME_HEIGHT - WALL_SIZE
-    ):
-        x_cell = x - WALL_SIZE
-        y_cell = y - WALL_SIZE
-        return int(x_cell // CELL_SIZE), int(y_cell // CELL_SIZE)
-    return None
-
-
-def cell_to_pixels(xy_pos: tuple[int, int]) -> tuple[int, int]:
-    """
-    Переводит клетку комнаты в пиксели на экране (центр клетки).
-
-    :param xy_pos: Координаты клекти.
-    :return: Координаты в пикселях (центр).
-    """
-    x_cell, y_cell = xy_pos
-    x = x_cell * CELL_SIZE + WALL_SIZE + CELL_SIZE // 2
-    y = y_cell * CELL_SIZE + WALL_SIZE + CELL_SIZE // 2
-    return int(x), int(y)
-
-
-def cut_sheet(
-    sheet: str | pg.Surface,
-    columns: int,
-    rows: int,
-    total: int = None,
-    scale_sizes: tuple[int, int] = None,
-) -> list[pg.Surface]:
-    """
-    Загрузка шрифта.
-
-    :param sheet: Путь до файла, начиная от src/data, e.g. "font/prices.png" (или сразу Surface).
-    :param columns: Количество столбцов.
-    :param rows: Количество строк.
-    :param total: Сколько всего букв (если есть пустые клетки).
-    :param scale_sizes: До каких размеров scale'ить (ширина, высота)
-    :return: Список с Surface, где все Surface - число/буква шрифта.
-    """
-
-    frames: list[pg.Surface] = []
-    if isinstance(sheet, str):
-        sheet = load_image(sheet)
-
-    rect = pg.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
-
-    if scale_sizes:
-        scale_sizes = (
-            scale_sizes[0] if scale_sizes[0] != -1 else rect.width,
-            scale_sizes[1] if scale_sizes[0] != -1 else rect.height,
-        )
-
-    for y in range(rows):
-        if total is not None and len(frames) == total:
-            break
-        for x in range(columns):
-            frame_location = (rect.w * x, rect.h * y)
-            part = sheet.subsurface(pg.Rect(frame_location, rect.size))
-
-            if scale_sizes:
-                part = pg.transform.scale(part, scale_sizes)
-
-            frames.append(part)
-
-            if total is not None and len(frames) == total:
-                break
-
-    return frames
-
-
-def get_direction(second_rect: pg.Rect, first_rect: pg.Rect):
-    """
-    Возвращает, с какой стороны второй rect
-
-    :param first_rect: тело, которое врезалось
-    :param second_rect: тело, с которым произошло столкновение
-    """
-    if (
-        first_rect.collidepoint(second_rect.midright)
-        and (
-            first_rect.collidepoint(second_rect.topright)
-            or first_rect.collidepoint(second_rect.bottomright)
-        )
-        and not first_rect.collidepoint(second_rect.midleft)
-        and (
-            not first_rect.collidepoint(second_rect.topleft)
-            or not first_rect.collidepoint(second_rect.bottomleft)
-        )
-    ):
-        return Moves.RIGHT
-
-    if (
-        first_rect.collidepoint(second_rect.midleft)
-        and (
-            first_rect.collidepoint(second_rect.topleft)
-            or first_rect.collidepoint(second_rect.bottomleft)
-        )
-        and not first_rect.collidepoint(second_rect.midright)
-        and (
-            not first_rect.collidepoint(second_rect.topright)
-            or not first_rect.collidepoint(second_rect.bottomright)
-        )
-    ):
-        return Moves.LEFT
-
-    if (
-        first_rect.collidepoint(second_rect.midbottom)
-        and (
-            first_rect.collidepoint(second_rect.bottomleft)
-            or first_rect.collidepoint(second_rect.bottomright)
-        )
-        and not first_rect.collidepoint(second_rect.midtop)
-        and (
-            not first_rect.collidepoint(second_rect.topleft)
-            or not first_rect.collidepoint(second_rect.topright)
-        )
-    ):
-        return Moves.DOWN
-
-    if (
-        first_rect.collidepoint(second_rect.midtop)
-        and (
-            first_rect.collidepoint(second_rect.topleft)
-            or first_rect.collidepoint(second_rect.topright)
-        )
-        and not first_rect.collidepoint(second_rect.midbottom)
-        and (
-            not first_rect.collidepoint(second_rect.bottomleft)
-            or not first_rect.collidepoint(second_rect.bottomright)
-        )
-    ):
-        return Moves.UP
-
-    first_rect, second_rect = second_rect, first_rect
-
-    if second_rect.collidepoint(first_rect.topleft):
-        return Moves.TOPLEFT
-
-    if second_rect.collidepoint(first_rect.topright):
-        return Moves.TOPRIGHT
-
-    if second_rect.collidepoint(first_rect.bottomleft):
-        return Moves.BOTTOMLEFT
-
-    if second_rect.collidepoint(first_rect.bottomright):
-        return Moves.BOTTOMRIGHT
-
-
 def create_data_base():
     con = sqlite3.connect(resource_path("stats.sqlite", use_abs_path=True)[0])
     cur = con.cursor()
@@ -274,6 +117,45 @@ def create_data_base():
             """,
     )
     con.commit()
+
+
+def get_cell_coords_from_coords(x: float, y: float) -> tuple[int, int]:
+    """
+    :param x:
+    :param y:
+    :return: (a, b)
+    чтобы обратиться к клетке cells[a][b]
+    """
+    half = MAP_SIZE / 2 * CELL_SIZE
+    x += half
+    y += half
+    a = y // CELL_SIZE
+    b = x // CELL_SIZE
+    return int(a), int(b)
+
+
+def get_coords_from_cell(a: int, b: int) -> tuple[float, float]:
+    """
+    :param a:
+    :param b:
+    :return: (x, y)
+    Возвращает координаты центра клетки
+    """
+    half = MAP_SIZE / 2 * CELL_SIZE
+    a *= CELL_SIZE
+    b *= CELL_SIZE
+    x = b - half + CELL_SIZE // 2
+    y = a - half + CELL_SIZE // 2
+    return x, y
+
+
+def get_cell_from_list_coords(cells: list[list[int]], a: int, b: int):
+    return cells[MAP_SIZE - a - 1][b]
+
+
+def get_cell_from_coords(cells, x, y):
+    a, b = get_cell_coords_from_coords(x, y)
+    return get_cell_from_list_coords(cells, a, b)
 
 
 def add_db(win_or_loose: str, score: int):
