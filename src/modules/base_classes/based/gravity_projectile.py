@@ -1,6 +1,7 @@
 import math
 
 import pygame
+
 import src.consts
 
 GRAVITY_POWER = src.consts.GRAVITY_POWER

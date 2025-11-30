@@ -4,6 +4,7 @@ import sys
 from functools import cache
 
 import pygame as pg
+
 import src.consts
 
 CELL_SIZE = src.consts.CELL_SIZE
@@ -24,9 +25,9 @@ def resource_path(*relative_path, use_abs_path: bool = False):
 
 @cache
 def load_image(
-        name: str,
-        colorkey: pg.Color | int | None = None,
-        crop_it: bool = False,
+    name: str,
+    colorkey: pg.Color | int | None = None,
+    crop_it: bool = False,
 ) -> pg.Surface:
     """
     Загрузка изображения в pygame.Surface.
