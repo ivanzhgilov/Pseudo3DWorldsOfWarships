@@ -35,14 +35,15 @@ class StartScreen:
             "Выход",
             self.buttons,
         )
+        self.fon = load_image("images/menu/main_background.png")
 
         self.sound_start = load_sound("sounds/menu/start_game.mp3")
         self.sound_settings = load_sound("sounds/menu/button_click.mp3")
         self.sound_quit = load_sound("sounds/menu/button_click.mp3")
 
-        self.sound_main = load_sound("sounds/menu/button_click.mp3")
+        self.sound_button = load_sound("sounds/menu/button_click.mp3")
 
-        self.menu_theme = load_sound("sounds/menu/menu_theme.mp3")
+        self.menu_theme = load_sound("sounds/game/epic_theme.mp3")
         self.menu_theme.set_volume(0.3)
 
     def update(self):
@@ -78,9 +79,9 @@ class StartScreen:
 
     def start_screen(self):
         clock = pygame.time.Clock()
-        fon = pygame.transform.smoothscale(
-            load_image("images/menu/main_background.png"), (WIDTH, HEIGHT)
-        )
+        if not pygame.mixer.get_busy():
+            self.start_music()
+        fon = pygame.transform.smoothscale(self.fon, (WIDTH, HEIGHT))
         self.screen.blit(fon, (0, 0))
         while self.running:
             self.handle_event()
@@ -118,7 +119,7 @@ class StartScreen:
         )
         settings_menu.start_menu()
 
-        self.sound_main.play()
+        self.sound_button.play()
         self.start_screen()
 
     def start_quit_menu(self):
@@ -135,13 +136,12 @@ class StartScreen:
         )
         quit_menu.start_menu()
 
-        self.sound_main.play()
+        self.sound_button.play()
         self.start_screen()
 
     def start_play(self):
+        self.menu_theme.stop()
         self.sound_start.play()
-        print(12)
-        return 1
 
     def start_music(self):
         self.menu_theme.play(-1)

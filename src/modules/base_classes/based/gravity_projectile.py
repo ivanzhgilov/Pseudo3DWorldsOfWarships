@@ -3,6 +3,7 @@ import math
 import pygame
 
 import src.consts
+from src.utils.funcs import load_sound
 
 GRAVITY_POWER = src.consts.GRAVITY_POWER
 """
@@ -22,6 +23,8 @@ class GravityProjectile(pygame.sprite.Sprite):
         self.speed_z = start_speed * math.sin(angle_height)
         self.speed_x = start_speed * math.cos(angle_height) * math.cos(angle_width)
         self.speed_y = start_speed * math.cos(angle_height) * math.sin(angle_width)
+        self.sound_fallen = load_sound("sounds/game/fallen_water.mp3")
+        self.is_fallen = False
 
     def update(self, delta_t):
         self.flight(delta_t)
@@ -35,7 +38,8 @@ class GravityProjectile(pygame.sprite.Sprite):
         self.speed_z -= GRAVITY_POWER * delta_t
 
     def is_fall(self):
-        if self.cord_z <= 0:
+        if self.cord_z <= -50:
+            self.is_fallen = True
             return True
         return False
 
@@ -47,3 +51,4 @@ class GravityProjectile(pygame.sprite.Sprite):
         self.gravity(delta_t)
         if self.is_fall():
             self.delete_projectile()
+            self.sound_fallen.play()
